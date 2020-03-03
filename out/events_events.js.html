@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: events/events.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: events/events.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import ClassPopup from '../classPopup/classPopup.js';
+import validate from '../validate/validate.js';
+import XHR from '../xhr/xhr.js';
+import ApiData from '../apidata/apidata.js';
+
+const classpopup = new ClassPopup();
+const api = new ApiData();
+
+/**
+ * Создает экземпляр Events
+ * Хранит методы обработчики событий и другие побочный методы
+ * @this {ClassPopup}
+ */
+export default class Events extends ClassPopup {
+
+    /**
+     * анимируем popup
+     * @param {String} popup 
+     */
+    addPopupAndAnimate(popup) {
+        if (document.querySelector('.popup-module') === null) {
+
+            //добавляем
+            this.addPopup(popup)
+
+        } else {
+            document.querySelector(`.${classpopup._classPopup.mainClassPopup}`).remove()
+
+            //добавляем
+            this.addPopup(popup)
+        
+        }
+    }
+    /**
+     * добавляем popup
+     * @param {String} popup
+     */
+    addPopup(popup) {
+        
+        document.querySelector('body').append(popup)
+
+        document.querySelector(`.${classpopup._classPopup.classClosePage[2].animatedClass}`)
+        .style.cssText = `margin-top:5%; animation: visible-popup-open ${classpopup._ms};`
+    }
+
+
+    /**
+     * маска для номера телефона
+     * @param {Object} event 
+     */
+    phoneMask(event) {
+        
+        if( !(event.key == 'ArrowLeft' || event.key == 'ArrowRight' || event.key == 'Backspace' || event.key == 'Tab')) { event.preventDefault() }
+         var mask = '+7 (111) 111-11-11'; // Задаем маску
+         
+         if (/[0-9\+\ \-\(\)]/.test(event.key)) {
+             
+             var currentString = this.value;
+             var currentLength = currentString.length;
+
+             if (/[0-9]/.test(event.key)) {
+
+                 if (mask[currentLength] == '1') {
+
+                     this.value = currentString + event.key;
+
+                 } else {
+
+                     for (var i = currentLength; i &lt; mask.length; i++) {
+
+                     if (mask[i] == '1') {
+                         
+                         this.value = currentString + event.key;
+                         break;
+                     }
+
+                     currentString += mask[i];
+
+                     }
+                 }
+             }
+         } 
+    }
+
+    // END маска для номера телефона
+
+    /**
+     * закрываем popup
+     * @param {Object} e 
+     */
+    closePopup(e) {
+
+        e.stopPropagation()
+
+        const popup = document.querySelector(`.${this._classPopup.mainClassPopup}`),
+                  popupAnimated = document.querySelector(`.${this._classPopup.classClosePage[2].animatedClass}`);
+
+        if (/popup-close-page/g.test(e.target.attributes.class.nodeValue)) {
+            close(popupAnimated, popup)
+        } else if (/close/g.test(e.target.attributes.class.nodeValue)) {
+            close(popupAnimated, popup)
+        }
+
+        function close(popupAnimated, popup) {
+        
+            popupAnimated.style.cssText = `animation: hidden-popup ${classpopup._ms}; margin-top:0;`
+        
+            setTimeout(()=>{
+                
+                document.querySelector(`.${classpopup._classPopup.mainClassPopup}`).remove()
+                /*popup.style.display = 'none'
+                
+                document.querySelector(`.popup`).innerHTML = create.createElementPopup().block.innerHTML;*/
+            }, classpopup._msNumber)   
+        }
+    }
+
+    /**
+     * открытие окна настройки
+     * @param {Object} e 
+     */
+    openOption(e) {
+
+        e.stopPropagation()
+        
+        const option = document.querySelector('.option-popup__content');
+
+        if (option.style.opacity !== '1') {
+            visivleOrHiddenOption(`animation:visible-option ${classpopup._ms}`, "opacity:1; z-index:0;")
+        } else {
+            visivleOrHiddenOption(`animation:hidden-option ${classpopup._ms}`, "opacity:0; z-index:-1;")
+        }
+
+        /**
+         * Анимация окна настройки
+         * @param {String} anim 
+         * @param {String} mainStyle 
+         */
+        function visivleOrHiddenOption(anim, mainStyle) {
+            option.style.cssText = anim;
+
+            setTimeout(()=>{
+                option.style.cssText = mainStyle;
+            }, classpopup._msNumber)
+        }
+    }
+
+    /**
+     * замена заголовка
+     * @param {Object} t 
+     */
+    inputChangeHeader(t) {
+       document.querySelector('.popup-module-close-page__content h2').innerHTML = t.target.value.replace(/^\s$/g, '')
+    }
+    /**
+     * 
+     * @param {Object} t 
+     */
+    inputChangePostHeader(t) {
+        document.querySelector('.popup-module-close-page__content h5').innerHTML = t.target.value.replace(/^\s$/g, '')
+     }
+
+    /**
+     * отправка почты
+     */
+    sendEmailViaAjax() {
+
+        if (/utm/.test(window.location.href)) {
+            utmMarker()
+        } else {
+            notUtmMarker()
+        }
+
+        /**
+         * обрабатывает данные с UTM метками
+         */
+        function utmMarker() {
+
+            api.getApiData()
+            .then(result => {
+
+                let g = window.location.href.match(/utm_.{1,}=.{1,}/igm);
+                g = g[0].split('&amp;');
+                
+                let email = validate.validateEmail(document.querySelector('.option-popup__content input[name="replace-email"]').value) ? 
+                '&amp;email='+document.querySelector('.option-popup__content input[name="replace-email"]').value : '&amp;email=' + result[0].mail_email,
+    
+                data = 'phone='+validate.validateInput(document.forms.person.children[2].value)
+                    +'&amp;nameForm='+encodeURIComponent(document.querySelector('.popup-module form').getAttribute('data-type'))
+                    +'&amp;nameWebsite='+encodeURIComponent(result[0].site_url)
+                    +'&amp;nameWebsitePage='+encodeURIComponent(result[0].site_url)
+                    +'&amp;headerMail='+encodeURIComponent(result[0].mail_subject)
+                    +'&amp;utm_source='+encodeURIComponent(g[0])
+                    +'&amp;utm_medium='+encodeURIComponent(g[1])
+                    +'&amp;utm_term='+encodeURIComponent(g[2])
+                    +'&amp;utm_content='+encodeURIComponent(g[3])
+                    +'&amp;utm_campaign='+encodeURIComponent(g[4])
+                    +'&amp;active_bitrix24='+encodeURIComponent(result[0].active_bitrix24)
+                    +'&amp;bitrix_user='+encodeURIComponent(result[0].bitrix_user)
+                    +'&amp;bitrix_api='+encodeURIComponent(result[0].bitrix_api)
+                    +email; // значение не сохранялось при использовании отдельной функции
+                
+                if (!/phone=false/.test(data)) {
+                    document.querySelector(classpopup.sendBtn).setAttribute('disabled', 'disabled')
+                    XHR._XHREmail(data);
+                }
+            }).catch(e => {
+                console.log('Ошибка работы API!', e)
+            })
+        }
+
+        /**
+         * обрабатывает данные без UTM меток
+         */
+        function notUtmMarker() {
+
+            api.getApiData()
+            .then(result => {
+
+                let email = validate.validateEmail(document.querySelector('.option-popup__content input[name="replace-email"]').value) ? 
+                '&amp;email='+document.querySelector('.option-popup__content input[name="replace-email"]').value : '&amp;email=' + result[0].mail_email,
+
+                data = 'phone='+validate.validateInput(document.forms.person.children[2].value)
+                    +'&amp;nameForm='+encodeURIComponent(document.querySelector('.popup-module form').getAttribute('data-type'))
+                    +'&amp;nameWebsite='+encodeURIComponent(result[0].site_url)
+                    +'&amp;nameWebsitePage='+encodeURIComponent(result[0].site_url)
+                    +'&amp;headerMail='+encodeURIComponent(result[0].mail_subject)
+                    +'&amp;active_bitrix24='+encodeURIComponent(result[0].active_bitrix24)
+                    +'&amp;bitrix_user='+encodeURIComponent(result[0].bitrix_user)
+                    +'&amp;bitrix_api='+encodeURIComponent(result[0].bitrix_api)
+                    +email; // значение не сохранялось при использовании отдельной функции
+                    
+                if (!/phone=false/.test(data)) {
+                    document.querySelector(classpopup.sendBtn).setAttribute('disabled', 'disabled')
+                    XHR._XHREmail(data);
+
+                }
+            }).catch(e => {
+                console.log('Ошибка работы API!', e)
+            })
+        }
+    }
+
+    /**
+     * сохрание данных
+    */
+    saveOption() {
+        let inputChangeHeader = document.querySelector('.popup-module-close-page__content h2').innerHTML,
+            inputChangePostHeader = document.querySelector('.popup-module-close-page__content h5').innerHTML;
+    }
+
+    /**
+     * Добавляет заголовки в попап
+     * @param {Promise} promise данные из api 
+     */
+    addTitleAndSubtitle(promise) {
+        promise.then(
+            result => {
+                
+                if (document.querySelector(`.${classpopup._classPopup.classClosePage[2].identifyClass[0]}`)) {
+
+                    executor(
+                                [
+                                    result[0].form_title.length === 0 ? classpopup._titleDefault : result[0].form_title,
+                                    result[0].form_subtitle.length === 0 ? classpopup._subTitleDefault : result[0].form_subtitle
+                                ]
+                        )
+
+                } else if (document.querySelector(`.${classpopup._classPopup.classClosePage[2].identifyClass[1]}`)) {
+
+                    executor(
+                                [
+                                    result[0].form_discount_title.length === 0 ? classpopup._discountTitleDefault : result[0].form_discount_title,
+                                    result[0].form_discount_subtitle.length === 0 ? classpopup._discountSubTitleDefault : result[0].form_discount_subtitle
+                                ]
+                        )
+                }
+            }
+        ).catch(e => {
+            console.log('Ошибка работы API!', e)
+        })
+
+        function executor(titles) {
+
+            document.querySelector(`.popup-module-close-page__content h2`).innerHTML = titles[0]
+            document.querySelector(`.popup-module-close-page__content h5`).innerHTML = titles[1]
+        
+        }
+    }
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Message.html">Message</a></li><li><a href="module.exports.html">exports</a></li><li><a href="Validate.html">Validate</a></li><li><a href="XHR.html">XHR</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addPopup">addPopup</a></li><li><a href="global.html#addPopupAndAnimate">addPopupAndAnimate</a></li><li><a href="global.html#addTitleAndSubtitle">addTitleAndSubtitle</a></li><li><a href="global.html#closePopup">closePopup</a></li><li><a href="global.html#getApiData">getApiData</a></li><li><a href="global.html#inputChangeHeader">inputChangeHeader</a></li><li><a href="global.html#inputChangePostHeader">inputChangePostHeader</a></li><li><a href="global.html#openOption">openOption</a></li><li><a href="global.html#phoneMask">phoneMask</a></li><li><a href="global.html#saveOption">saveOption</a></li><li><a href="global.html#sendEmailViaAjax">sendEmailViaAjax</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Aug 14 2019 16:32:50 GMT+0300 (GMT+03:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

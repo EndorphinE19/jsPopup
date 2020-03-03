@@ -1,0 +1,19 @@
+[
+    {
+        "site_id":"5",
+        "site_name":"Локальный тестовый сайт",
+        "site_url":"http://jspopup/",
+        "site_mirror":"",
+        "site_exceptions":"",
+        "mail_email":"jspopup@sitemanage.ru",
+        "mail_subject":"Заявка с тестового сайта",
+        "form_title":"",
+        "form_subtitle":"",
+        "active_closeform":"1",
+        "active_widget":"1",
+        "form_discount_title":"",
+        "active_discount":"1",
+        "form_discount_subtitle":"jsPopup",
+        "form_discount_timeout":"10"
+    }
+]

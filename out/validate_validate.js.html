@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: validate/validate.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: validate/validate.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import ClassPopup from '../classPopup/classPopup.js';
+import message from '../message/message.js';
+import punycode from '../punycode/punycode.js';
+
+const classpopup = new ClassPopup();
+
+/**
+ * Создает экземпляр Validate
+ * Хранит методы валидации
+ * @this {ClassPopup}
+ */
+class Validate extends ClassPopup {
+
+    /**
+     * Возвращает закодированную строку для URL
+     * 
+     * @param {String} 
+     * @return {String} 
+     */
+    validateInput(data) {
+        if (data.length !== 0 &amp;&amp; data.length === 18) {
+            document.querySelector(`.${classpopup._classPopup.classClosePage[0]} input[type="tel"]`).style.border = '1px solid green'
+            return encodeURIComponent(data)
+        } else {
+            document.querySelector(`.${classpopup._classPopup.classClosePage[0]} input[type="tel"]`).style.border = '1px solid red'
+            return false
+        }
+    }
+
+    /**
+     * Проверяет email на корректность
+     * @param {String}
+     * @return {Boolean}
+     */
+    validateEmail(email) {
+        if (classpopup._validateEmailRegExp.test(email)) {
+            return true
+        }
+       
+        message.errorMessageAtValidation()
+        return false
+    }
+
+    /**
+     * Определяет работу popup на сайте
+     * @param {String} url_exc Исключение
+     * @param {String} url_mirror Зеркала
+     * @param {String} url_site Текущий сайт
+     */
+    urlsite(url_exc, url_mirror, url_site) {
+
+        var url = [], exc = [], url_page = '';
+        classpopup._nameWebsite = punycode.ToUnicode(classpopup._nameWebsite)
+
+        if (typeof url_site === 'string' &amp;&amp; url_site.length !== 0) {
+
+            url_site = url_site.split(',').length > 1 ? url_site : String(url_site).replace(/.{1,}:\/\//, '').replace(/\..{1,}/, '')
+            url_exc = url_exc.split(',')
+            url_page = punycode.ToUnicode(location.href).replace(/.{1,}:\/\/.{1,}\//, '')
+
+            for (var j = 0; j &lt; url_exc.length; j++) {
+
+                exc.push(url_exc[j].replace(/.{1,}:\/\/.{1,}\//, ''))
+                
+                if (exc[j] === url_page &amp;&amp; (exc[j].length !== 0 &amp;&amp; url_page.length !== 0)) {
+                    
+                    return false
+
+                } else if (exc[j].length === 0 || url_page.length === 0) {
+
+                    if (punycode.ToUnicode(url_site) === classpopup._nameWebsite) {
+                        return true
+                    }
+                }  else {
+                    return true
+                }
+            }
+        }
+
+        if (typeof url_mirror === 'string' &amp;&amp; url_mirror.length !== 0) {
+
+            url_mirror = url_mirror.split(',')
+            
+            for (var i = 0; i &lt; url_mirror.length; i++) {
+                
+                url.push(url_mirror[i].replace(/.{1,}:\/\//, '').replace(/\..{1,}/, ''))
+                
+                if (url[i] === classpopup._nameWebsite) {
+                    return true
+                }
+            }
+        }
+    }
+}
+
+var validate = new Validate();
+export default validate;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Message.html">Message</a></li><li><a href="module.exports.html">exports</a></li><li><a href="Validate.html">Validate</a></li><li><a href="XHR.html">XHR</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addPopup">addPopup</a></li><li><a href="global.html#addPopupAndAnimate">addPopupAndAnimate</a></li><li><a href="global.html#addTitleAndSubtitle">addTitleAndSubtitle</a></li><li><a href="global.html#closePopup">closePopup</a></li><li><a href="global.html#getApiData">getApiData</a></li><li><a href="global.html#inputChangeHeader">inputChangeHeader</a></li><li><a href="global.html#inputChangePostHeader">inputChangePostHeader</a></li><li><a href="global.html#openOption">openOption</a></li><li><a href="global.html#phoneMask">phoneMask</a></li><li><a href="global.html#saveOption">saveOption</a></li><li><a href="global.html#sendEmailViaAjax">sendEmailViaAjax</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Aug 14 2019 16:32:50 GMT+0300 (GMT+03:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
