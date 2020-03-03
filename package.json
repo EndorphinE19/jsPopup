@@ -1,0 +1,26 @@
+{
+  "name": "jspopup",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch --mode development"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "babel": "^6.23.0",
+    "babel-loader": "^8.0.6",
+    "webpack": "^4.37.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "jsdoc-webpack-plugin": "^0.1.0",
+    "jsdoc-webpack-plugin-v4": "^1.0.1",
+    "jslint": "^0.12.1",
+    "webpack-cli": "^3.3.6"
+  }
+}
